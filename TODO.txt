@@ -1,0 +1,25 @@
+Ideas
+- Name : FNotes (FreshNotes)
+
+Features to Add
+- Logging Middleware (Modular to port to other things)
+-Analytics page (Modular / Boilerplate to port to other things)
+- Make a way to CLI curl? call to the api via shortcut commands anywhere
+    - Example: fnotes add <Note:Params:Params2> 
+        Behind the shortcut it curls to xx site with API call add notes with X data
+- Note Folders / Tags / Colors / Staging / priority
+- Master List / Sorting / Searching
+- Note Timers/Reminders
+- Custom Popups
+
+Future:
+- Users / Teams(Shared Lists)
+- Clone Note
+
+Modulars to Put in a Boilerplate File
+- Footer
+- Navbar?
+- Sidebar?
+- Logging
+- Auth / User Baseline
+- Analytics / Health
