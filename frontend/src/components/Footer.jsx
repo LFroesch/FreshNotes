@@ -20,7 +20,8 @@ const Footer = () => {
 					>
 						GitHub
 					</a>
-					. DISCLAIMER: This project is for educational purposes.
+					. <br/>
+					<strong>DISCLAIMER:</strong> This project is for <strong>EDUCATIONAL PURPOSES.</strong>
 				</p>
 			</div>
 		</footer>
