@@ -10,11 +10,8 @@ A simple note-taking app built with React and Node.js.
 
 1. **Install dependencies**
    ```bash
-   # Frontend
-   cd frontend && npm install
-   
-   # Backend  
-   cd backend && npm install
+   # Main Folder
+   npm run build
    ```
 
 2. **Setup environment**
