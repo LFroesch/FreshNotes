@@ -67,36 +67,74 @@ const NoteDetailPage = () => {
 
   // Simple markdown to HTML converter for display
   const renderMarkdown = (text) => {
-    if (!text) return '';
-    
-    return text
-      // Headers
-      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-6 mb-3 text-base-content">$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mt-6 mb-3 text-base-content">$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-4 text-base-content">$1</h1>')
-      
-      // Bold and Italic
-      .replace(/\*\*(.*?)\*\*/gim, '<strong class="font-semibold">$1</strong>')
-      .replace(/\*(.*?)\*/gim, '<em class="italic">$1</em>')
-      
-      // Code
-      .replace(/```([\s\S]*?)```/gim, '<pre class="bg-base-300 rounded p-4 my-4 overflow-x-auto"><code class="text-sm font-mono">$1</code></pre>')
-      .replace(/`(.*?)`/gim, '<code class="bg-base-300 px-2 py-1 rounded text-sm font-mono">$1</code>')
-      
-      // Links
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" class="text-primary underline hover:text-primary-focus" target="_blank" rel="noopener">$1</a>')
-      
-      // Blockquotes
-      .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-primary/30 pl-4 my-4 text-base-content/80 italic">$1</blockquote>')
-      
-      // Lists
-      .replace(/^- (.*$)/gim, '<li class="ml-4 list-disc list-inside my-1">$1</li>')
-      .replace(/^\* (.*$)/gim, '<li class="ml-4 list-disc list-inside my-1">$1</li>')
-      .replace(/^\d+\. (.*$)/gim, '<li class="ml-4 list-decimal list-inside my-1">$1</li>')
-      
-      // Line breaks
-      .replace(/\n/gim, '<br>');
+  if (!text) return '';
+  
+  let processedText = text;
+  
+  // Helper function to ensure URL has protocol
+  const ensureProtocol = (url) => {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    return 'https://' + url;
   };
+  
+  // Process in order to avoid conflicts
+  
+  // 1. Headers
+  processedText = processedText
+    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-6 mb-3 text-base-content">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mt-6 mb-3 text-base-content">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-4 text-base-content">$1</h1>');
+  
+  // 2. Code blocks (must come before inline code and links)
+  processedText = processedText
+    .replace(/```([\s\S]*?)```/gim, '<pre class="bg-base-300 rounded p-4 my-4 overflow-x-auto"><code class="text-sm font-mono">$1</code></pre>')
+    .replace(/`([^`]+)`/gim, '<code class="bg-base-300 px-2 py-1 rounded text-sm font-mono">$1</code>');
+  
+  // 3. Markdown-style links [text](url) - process before auto-linking
+  processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/gim, (match, text, url) => {
+    const fullUrl = ensureProtocol(url);
+    return `<a href="${fullUrl}" class="text-primary underline hover:text-primary-focus" target="_blank" rel="noopener noreferrer">${text}</a>`;
+  });
+  
+  // 4. Auto-detect plain URLs (avoid URLs already in markdown links or code blocks)
+  processedText = processedText.replace(
+    /(?<!<[^>]*|`[^`]*|\[[^\]]*\]\()[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}(?:\/[^\s<]*)?/gi,
+    (match) => {
+      // Skip if this URL is already inside HTML tags or code
+      return `<a href="${ensureProtocol(match)}" class="text-primary underline hover:text-primary-focus" target="_blank" rel="noopener noreferrer">${match}</a>`;
+    }
+  );
+  
+  // 5. Auto-detect URLs starting with http/https
+  processedText = processedText.replace(
+    /(?<!<[^>]*|`[^`]*|\[[^\]]*\]\()https?:\/\/[^\s<]+/gi,
+    (match) => {
+      return `<a href="${match}" class="text-primary underline hover:text-primary-focus" target="_blank" rel="noopener noreferrer">${match}</a>`;
+    }
+  );
+  
+  // 6. Bold and Italic
+  processedText = processedText
+    .replace(/\*\*([^*]+)\*\*/gim, '<strong class="font-semibold">$1</strong>')
+    .replace(/\*([^*]+)\*/gim, '<em class="italic">$1</em>');
+  
+  // 7. Blockquotes
+  processedText = processedText
+    .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-primary/30 pl-4 my-4 text-base-content/80 italic">$1</blockquote>');
+  
+  // 8. Lists
+  processedText = processedText
+    .replace(/^- (.*$)/gim, '<li class="ml-4 list-disc list-inside my-1">$1</li>')
+    .replace(/^\* (.*$)/gim, '<li class="ml-4 list-disc list-inside my-1</li>')
+    .replace(/^\d+\. (.*$)/gim, '<li class="ml-4 list-decimal list-inside my-1">$1</li>');
+  
+  // 9. Line breaks
+  processedText = processedText.replace(/\n/gim, '<br>');
+  
+  return processedText;
+};
 
   const getPriorityColor = (priority) => {
     switch (priority) {
