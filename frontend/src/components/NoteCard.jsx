@@ -47,18 +47,6 @@ const NoteCard = ({ note, setNotes }) => {
       .trim();
     
   };
-    const getPriorityColor = (priority) => {
-  switch (priority) {
-    case 'high':
-      return 'text-error';
-    case 'medium':
-      return 'text-warning';
-    case 'low':
-      return 'text-success';
-    default:
-      return 'text-base-content/60';
-  }
-};
 
   const getPriorityBadge = (priority) => {
     const colors = {
@@ -79,7 +67,8 @@ const NoteCard = ({ note, setNotes }) => {
       <Link
         to={`/note/${note._id}`}
         className="card bg-base-100 hover:shadow-lg transition-all duration-200 
-        border-t-4 border-solid border-[#00FF9D]"
+        border-t-4 border-solid"
+        style={{ borderTopColor: note.color || '#00FF9D' }}
       >
         <div className="card-body">
           <div className="flex items-start justify-between gap-2 mb-2">

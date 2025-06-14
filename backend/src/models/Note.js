@@ -15,10 +15,14 @@ const noteSchema = new mongoose.Schema({
         enum: ['low', 'medium', 'high'],
         default: 'medium',
     },
+    color: {  // Add this field
+        type: String,
+        default: "#00FF9D", // Default color
+    },
     folderId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Folder',
-        default: null, // null means note is not in any folder
+        default: null,
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,

@@ -64,6 +64,12 @@ const EnhancedTextEditor = ({ value, onChange, placeholder = "Write your note he
     }, 0);
   };
 
+  const handleButtonClick = (e, action) => {
+    e.preventDefault(); // Prevent form submission
+    e.stopPropagation(); // Stop event bubbling
+    action();
+  };
+
   const formatButtons = [
     { icon: BoldIcon, label: 'Bold', action: () => insertMarkdown('**', '**', 'bold text') },
     { icon: ItalicIcon, label: 'Italic', action: () => insertMarkdown('*', '*', 'italic text') },
@@ -80,7 +86,8 @@ const EnhancedTextEditor = ({ value, onChange, placeholder = "Write your note he
           {formatButtons.map((btn, idx) => (
             <button
               key={idx}
-              onClick={btn.action}
+              type="button"
+              onClick={(e) => handleButtonClick(e, btn.action)}
               className="btn btn-ghost btn-xs tooltip"
               data-tip={btn.label}
             >
@@ -91,14 +98,16 @@ const EnhancedTextEditor = ({ value, onChange, placeholder = "Write your note he
           <div className="divider divider-horizontal mx-1"></div>
           
           <button
-            onClick={() => insertMarkdown('# ', '', 'Header')}
+            type="button"
+            onClick={(e) => handleButtonClick(e, () => insertMarkdown('# ', '', 'Header'))}
             className="btn btn-ghost btn-xs"
             title="Header"
           >
             H1
           </button>
           <button
-            onClick={() => insertMarkdown('## ', '', 'Header')}
+            type="button"
+            onClick={(e) => handleButtonClick(e, () => insertMarkdown('## ', '', 'Header'))}
             className="btn btn-ghost btn-xs"
             title="Header 2"
           >
@@ -107,7 +116,11 @@ const EnhancedTextEditor = ({ value, onChange, placeholder = "Write your note he
         </div>
 
         <button
-          onClick={() => setIsPreview(!isPreview)}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            setIsPreview(!isPreview);
+          }}
           className={`btn btn-xs ${isPreview ? 'btn-primary' : 'btn-ghost'}`}
           title={isPreview ? 'Edit' : 'Preview'}
         >

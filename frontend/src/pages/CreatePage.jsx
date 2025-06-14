@@ -10,6 +10,7 @@ const CreatePage = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [priority, setPriority] = useState("medium");
+  const [color, setColor] = useState("#00FF9D");
   const [folderId, setFolderId] = useState("");
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -17,6 +18,22 @@ const CreatePage = () => {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // Predefined colors for notes
+  const predefinedColors = [
+    "#00FF9D", // Primary green
+    "#FF6B6B", // Red
+    "#4ECDC4", // Teal
+    "#45B7D1", // Blue
+    "#96CEB4", // Light green
+    "#FECA57", // Yellow
+    "#FF9FF3", // Pink
+    "#54A0FF", // Light blue
+    "#5F27CD", // Purple
+    "#00D2D3", // Cyan
+    "#FF9F43", // Orange
+    "#10AC84", // Green
+  ];
 
   // Fetch folders on component mount
   useEffect(() => {
@@ -55,6 +72,7 @@ const CreatePage = () => {
         title,
         content,
         priority,
+        color, // Add color to the request
         folderId: folderId || null,
       });
 
@@ -143,6 +161,35 @@ const CreatePage = () => {
                   </div>
                 </div>
 
+                {/* Note Color Picker */}
+                <div className="form-control mb-4">
+                  <label className="label">
+                    <span className="label-text">Note Color</span>
+                  </label>
+                  <div className="flex flex-wrap gap-3 mb-3">
+                    {predefinedColors.map((colorOption) => (
+                      <button
+                        key={colorOption}
+                        type="button"
+                        className={`w-8 h-8 rounded-full border-2 transition-all ${
+                          color === colorOption 
+                            ? 'border-base-content scale-110' 
+                            : 'border-base-300 hover:border-base-content'
+                        }`}
+                        style={{ backgroundColor: colorOption }}
+                        onClick={() => setColor(colorOption)}
+                        title={colorOption}
+                      />
+                    ))}
+                  </div>
+                  <input
+                    type="color"
+                    className="input input-bordered w-full h-12"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                  />
+                </div>
+
                 <div className="form-control mb-4">
                   <label className="label">
                     <span className="label-text">Content *</span>
@@ -167,4 +214,5 @@ const CreatePage = () => {
     </div>
   );
 };
+
 export default CreatePage;

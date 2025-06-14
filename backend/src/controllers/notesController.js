@@ -46,7 +46,7 @@ export async function getNoteById(req, res) {
 
 export async function createNote(req, res) {
   try {
-    const { title, content, priority = 'medium', folderId } = req.body;
+    const { title, content, priority = 'medium', folderId, color } = req.body;
     
     // Validate priority
     if (!['low', 'medium', 'high'].includes(priority)) {
@@ -69,6 +69,7 @@ export async function createNote(req, res) {
       title, 
       content, 
       priority,
+      color: color || "#00FF9D",
       folderId: folderId && folderId !== 'null' ? folderId : null,
       userId: req.user._id 
     });
@@ -86,7 +87,7 @@ export async function createNote(req, res) {
 
 export async function updateNote(req, res) {
   try {
-    const { title, content, priority, folderId } = req.body;
+    const { title, content, priority, folderId, color } = req.body;
     
     // Validate priority if provided
     if (priority && !['low', 'medium', 'high'].includes(priority)) {
@@ -107,6 +108,7 @@ export async function updateNote(req, res) {
     
     const updateData = { title, content };
     if (priority) updateData.priority = priority;
+    if (color) updateData.color = color;
     if (folderId !== undefined) {
       updateData.folderId = folderId && folderId !== 'null' ? folderId : null;
     }

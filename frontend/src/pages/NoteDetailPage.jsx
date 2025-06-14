@@ -22,6 +22,22 @@ const NoteDetailPage = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
 
+  // Predefined colors for notes
+  const predefinedColors = [
+    "#00FF9D", // Primary green
+    "#FF6B6B", // Red
+    "#4ECDC4", // Teal
+    "#45B7D1", // Blue
+    "#96CEB4", // Light green
+    "#FECA57", // Yellow
+    "#FF9FF3", // Pink
+    "#54A0FF", // Light blue
+    "#5F27CD", // Purple
+    "#00D2D3", // Cyan
+    "#FF9F43", // Orange
+    "#10AC84", // Green
+  ];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -158,10 +174,12 @@ const NoteDetailPage = () => {
         title: note.title,
         content: note.content,
         priority: note.priority,
+        color: note.color, // Add color to update data
         folderId: note.folderId?._id || null
       };
 
       const response = await api.put(`/notes/${id}`, updateData);
+      setNote(response.data);
       setOriginalNote(response.data); // Update original with saved data
       setIsEditMode(false);
       
@@ -250,7 +268,10 @@ const NoteDetailPage = () => {
             </div>
 
             {/* Note Content */}
-            <div className="card bg-base-100">
+            <div 
+              className="card bg-base-100 border-l-4"
+              style={{ borderLeftColor: note?.color || '#00FF9D' }}
+            >
               <div className="card-body">
                 {!isEditMode ? (
                   /* VIEW MODE */
@@ -349,6 +370,35 @@ const NoteDetailPage = () => {
                           ))}
                         </select>
                       </div>
+                    </div>
+
+                    {/* Note Color Picker */}
+                    <div className="form-control mb-4">
+                      <label className="label">
+                        <span className="label-text">Note Color</span>
+                      </label>
+                      <div className="flex flex-wrap gap-3 mb-3">
+                        {predefinedColors.map((colorOption) => (
+                          <button
+                            key={colorOption}
+                            type="button"
+                            className={`w-8 h-8 rounded-full border-2 transition-all ${
+                              note.color === colorOption 
+                                ? 'border-base-content scale-110' 
+                                : 'border-base-300 hover:border-base-content'
+                            }`}
+                            style={{ backgroundColor: colorOption }}
+                            onClick={() => setNote({ ...note, color: colorOption })}
+                            title={colorOption}
+                          />
+                        ))}
+                      </div>
+                      <input
+                        type="color"
+                        className="input input-bordered w-full h-12"
+                        value={note.color || "#00FF9D"}
+                        onChange={(e) => setNote({ ...note, color: e.target.value })}
+                      />
                     </div>
 
                     <div className="form-control mb-6">
