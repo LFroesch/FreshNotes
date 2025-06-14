@@ -58,7 +58,7 @@ const ProfilePage = () => {
         setLoading(true);
         try {
             await axios.put('/api/profile/update', profileData);
-            await authCheck(); // Refresh user data
+            await authCheck();
             setEditingProfile(false);
             toast.success("Profile updated successfully");
         } catch (error) {
