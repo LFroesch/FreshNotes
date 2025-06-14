@@ -84,10 +84,12 @@ const ProfilePage = () => {
                 <div className="bg-base-100 rounded-xl p-8 border-t-4 border-primary shadow-lg mb-8">
                     <div className="flex flex-col md:flex-row items-start gap-6">
                         <div className="avatar">
-                            <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center">
-                                <span className="text-2xl font-bold text-primary">
-                                    {user.username?.charAt(0).toUpperCase()}
-                                </span>
+                            <div className="w-24 h-24 rounded-full bg-primary/20 relative">
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-6xl  font-bold text-primary select-none -translate-y-0.5">
+                                        {user.username?.charAt(0).toUpperCase()}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <div className="flex-1">
