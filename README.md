@@ -1,6 +1,6 @@
 # FreshNotes 📝
 
-A simple note-taking app built with React and Node.js.
+A Markdown note-taking app built with React and Node.js.
 
 ## Tech Stack
 - **Frontend:** React, Tailwind CSS + DaisyUI, React Router
