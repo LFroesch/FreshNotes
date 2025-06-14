@@ -1,8 +1,9 @@
+// frontend/src/pages/ProfilePage.jsx
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/authUser";
-import { Link } from "react-router"; // Add this import
+import { Link } from "react-router";
 import Navbar from "../components/Navbar";
-import { Edit3, Calendar, FileText } from "lucide-react";
+import { Edit3, Calendar, FileText, FolderIcon } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -25,6 +26,7 @@ const ProfilePage = () => {
     });
     const [loading, setLoading] = useState(false);
     const [notes, setNotes] = useState([]);
+    const [folders, setFolders] = useState([]);
 
     useEffect(() => {
         if (user) {
@@ -37,15 +39,19 @@ const ProfilePage = () => {
     }, [user]);
 
     useEffect(() => {
-        const fetchNotes = async () => {
+        const fetchData = async () => {
             try {
-                const res = await axios.get("/api/notes");
-                setNotes(res.data);
+                const [notesRes, foldersRes] = await Promise.all([
+                    axios.get("/api/notes"),
+                    axios.get("/api/folders")
+                ]);
+                setNotes(notesRes.data);
+                setFolders(foldersRes.data);
             } catch (error) {
-                console.error("Error fetching notes:", error);
+                console.error("Error fetching data:", error);
             }
         };
-        if (user) fetchNotes();
+        if (user) fetchData();
     }, [user]);
 
     const handleProfileSave = async () => {
@@ -87,7 +93,7 @@ const ProfilePage = () => {
                         <div className="avatar">
                             <div className="w-24 h-24 rounded-full bg-primary/20 relative">
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-6xl  font-bold text-primary select-none -translate-y-0.5">
+                                    <span className="text-6xl font-bold text-primary select-none -translate-y-0.5">
                                         {user.username?.charAt(0).toUpperCase()}
                                     </span>
                                 </div>
@@ -112,6 +118,10 @@ const ProfilePage = () => {
                                 <div className="flex items-center gap-1">
                                     <FileText size={16} />
                                     <span>{notes.length} notes</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <FolderIcon size={16} />
+                                    <span>{folders.length} folders</span>
                                 </div>
                             </div>
 
@@ -201,8 +211,8 @@ const ProfilePage = () => {
                     </div>
                 </div>
 
-                {/* My Notes Preview */}
-                <div>
+                {/* My Recent Notes Preview */}
+                <div className="mb-8">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-2xl font-bold">My Recent Notes</h2>
                         {notes.length > 6 && (
@@ -220,10 +230,26 @@ const ProfilePage = () => {
                                     className="card bg-base-100 border-t-4 border-primary hover:shadow-lg transition-all duration-200 cursor-pointer"
                                 >
                                     <div className="card-body">
-                                        <h4 className="card-title text-sm">{note.title}</h4>
+                                        <div className="flex items-start justify-between gap-2 mb-2">
+                                            <h4 className="card-title text-sm flex-1">{note.title}</h4>
+                                            <span className={`badge badge-sm ${
+                                                note.priority === 'high' ? 'badge-error' :
+                                                note.priority === 'medium' ? 'badge-warning' : 'badge-success'
+                                            }`}>
+                                                {note.priority}
+                                            </span>
+                                        </div>
                                         <p className="text-xs text-base-content/70 line-clamp-2">{note.content}</p>
-                                        <div className="text-xs text-base-content/50 mt-2">
-                                            {formatDate(note.createdAt)}
+                                        <div className="flex items-center justify-between mt-2">
+                                            <div className="text-xs text-base-content/50">
+                                                {formatDate(note.createdAt)}
+                                            </div>
+                                            {note.folderId && (
+                                                <div className="flex items-center gap-1 text-xs text-base-content/50">
+                                                    <FolderIcon className="size-3" />
+                                                    <span>{note.folderId.name}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </Link>
@@ -236,6 +262,62 @@ const ProfilePage = () => {
                             </p>
                             <Link to="/create" className="btn btn-primary">
                                 Create Your First Note
+                            </Link>
+                        </div>
+                    )}
+                </div>
+
+                {/* My Folders Section */}
+                <div>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-2xl font-bold">My Folders</h2>
+                        {folders.length > 6 && (
+                            <Link to="/" className="btn btn-outline btn-sm">
+                                View All Folders
+                            </Link>
+                        )}
+                    </div>
+                    {folders.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {folders.slice(0, 6).map((folder) => (
+                                <Link 
+                                    key={folder._id} 
+                                    to={`/folder/${folder._id}`}
+                                    className="card bg-base-100 border-t-4 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                                    style={{ borderTopColor: folder.color }}
+                                >
+                                    <div className="card-body">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <FolderIcon 
+                                                className="size-5 flex-shrink-0" 
+                                                style={{ color: folder.color }}
+                                            />
+                                            <h4 className="card-title text-sm truncate">{folder.name}</h4>
+                                        </div>
+                                        {folder.description && (
+                                            <p className="text-xs text-base-content/70 line-clamp-2">
+                                                {folder.description}
+                                            </p>
+                                        )}
+                                        <div className="flex items-center justify-between mt-2">
+                                            <div className="text-xs text-base-content/50">
+                                                {folder.noteCount || 0} notes
+                                            </div>
+                                            <div className="text-xs text-base-content/50">
+                                                {formatDate(folder.createdAt)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                            <p className="text-base-content/70 mb-4">
+                                No folders yet. Create folders to organize your notes!
+                            </p>
+                            <Link to="/folder/create" className="btn btn-secondary">
+                                Create Your First Folder
                             </Link>
                         </div>
                     )}

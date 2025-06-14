@@ -1,3 +1,4 @@
+// backend/src/models/Note.js
 import mongoose from 'mongoose';
 
 const noteSchema = new mongoose.Schema({
@@ -8,6 +9,16 @@ const noteSchema = new mongoose.Schema({
     content: {
         type: String,
         required: true,
+    },
+    priority: {
+        type: String,
+        enum: ['low', 'medium', 'high'],
+        default: 'medium',
+    },
+    folderId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Folder',
+        default: null, // null means note is not in any folder
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,

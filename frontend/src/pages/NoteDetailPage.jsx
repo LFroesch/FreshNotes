@@ -1,25 +1,38 @@
+// frontend/src/pages/NoteDetailPage.jsx
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
-import { ArrowLeftIcon, LoaderIcon, Trash2Icon, FileX } from "lucide-react";
-import ConfirmationModal from "../components/ConfirmationModal"; // Adjust path as needed
+import { ArrowLeftIcon, LoaderIcon, Trash2Icon, FileX, EditIcon, EyeIcon, SaveIcon, XIcon, FolderIcon } from "lucide-react";
+import ConfirmationModal from "../components/ConfirmationModal";
+import EnhancedTextEditor from "../components/EnhancedTextEditor";
+import { formatDate } from "../lib/utils";
 
 const NoteDetailPage = () => {
   const [note, setNote] = useState(null);
+  const [originalNote, setOriginalNote] = useState(null); // Store original for cancel functionality
+  const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    const fetchNote = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get(`/notes/${id}`);
-        setNote(res.data);
+        const [noteRes, foldersRes] = await Promise.all([
+          api.get(`/notes/${id}`),
+          api.get("/folders")
+        ]);
+        
+        setNote(noteRes.data);
+        setOriginalNote(noteRes.data); // Store original copy
+        setFolders(foldersRes.data);
         setNotFound(false);
       } catch (error) {
         console.log("Error in fetching note", error);
@@ -33,8 +46,77 @@ const NoteDetailPage = () => {
       }
     };
 
-    fetchNote();
+    fetchData();
   }, [id]);
+
+  // Simple markdown to HTML converter for display
+  const renderMarkdown = (text) => {
+    if (!text) return '';
+    
+    return text
+      // Headers
+      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-6 mb-3 text-base-content">$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mt-6 mb-3 text-base-content">$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-4 text-base-content">$1</h1>')
+      
+      // Bold and Italic
+      .replace(/\*\*(.*?)\*\*/gim, '<strong class="font-semibold">$1</strong>')
+      .replace(/\*(.*?)\*/gim, '<em class="italic">$1</em>')
+      
+      // Code
+      .replace(/```([\s\S]*?)```/gim, '<pre class="bg-base-300 rounded p-4 my-4 overflow-x-auto"><code class="text-sm font-mono">$1</code></pre>')
+      .replace(/`(.*?)`/gim, '<code class="bg-base-300 px-2 py-1 rounded text-sm font-mono">$1</code>')
+      
+      // Links
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" class="text-primary underline hover:text-primary-focus" target="_blank" rel="noopener">$1</a>')
+      
+      // Blockquotes
+      .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-primary/30 pl-4 my-4 text-base-content/80 italic">$1</blockquote>')
+      
+      // Lists
+      .replace(/^- (.*$)/gim, '<li class="ml-4 list-disc list-inside my-1">$1</li>')
+      .replace(/^\* (.*$)/gim, '<li class="ml-4 list-disc list-inside my-1">$1</li>')
+      .replace(/^\d+\. (.*$)/gim, '<li class="ml-4 list-decimal list-inside my-1">$1</li>')
+      
+      // Line breaks
+      .replace(/\n/gim, '<br>');
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'high':
+        return 'text-error';
+      case 'medium':
+        return 'text-warning';
+      case 'low':
+        return 'text-success';
+      default:
+        return 'text-base-content/60';
+    }
+  };
+
+  const getPriorityBadge = (priority) => {
+    const colors = {
+      high: 'badge-error',
+      medium: 'badge-warning',
+      low: 'badge-success'
+    };
+    
+    return (
+      <span className={`badge ${colors[priority] || 'badge-ghost'}`}>
+        {priority}
+      </span>
+    );
+  };
+
+  const handleEditClick = () => {
+    setIsEditMode(true);
+  };
+
+  const handleCancelEdit = () => {
+    setNote(originalNote); // Restore original values
+    setIsEditMode(false);
+  };
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
@@ -44,7 +126,13 @@ const NoteDetailPage = () => {
     try {
       await api.delete(`/notes/${id}`);
       toast.success("Note deleted");
-      navigate("/");
+      
+      const fromFolder = searchParams.get('from');
+      if (fromFolder) {
+        navigate(`/folder/${fromFolder}`);
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.log("Error deleting the note:", error);
       toast.error("Failed to delete note");
@@ -59,16 +147,25 @@ const NoteDetailPage = () => {
 
   const handleSave = async () => {
     if (!note.title.trim() || !note.content.trim()) {
-      toast.error("Please add a title or content");
+      toast.error("Please add a title and content");
       return;
     }
 
     setSaving(true);
 
     try {
-      await api.put(`/notes/${id}`, note);
+      const updateData = {
+        title: note.title,
+        content: note.content,
+        priority: note.priority,
+        folderId: note.folderId?._id || null
+      };
+
+      const response = await api.put(`/notes/${id}`, updateData);
+      setOriginalNote(response.data); // Update original with saved data
+      setIsEditMode(false);
+      
       toast.success("Note updated successfully");
-      navigate("/");
     } catch (error) {
       console.log("Error saving the note:", error);
       toast.error("Failed to update note");
@@ -85,7 +182,6 @@ const NoteDetailPage = () => {
     );
   }
 
-  // 404 Not Found Page
   if (notFound) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
@@ -118,62 +214,174 @@ const NoteDetailPage = () => {
     );
   }
 
-  // Regular note editing page
   return (
     <>
       <div className="min-h-screen bg-base-200">
         <div className="container mx-auto px-4 py-8">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-6xl mx-auto">
+            {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <Link to="/" className="btn btn-ghost">
-                <ArrowLeftIcon className="h-5 w-5" />
-                Back to Notes
-              </Link>
-              <button 
-                onClick={handleDeleteClick} 
-                className="btn btn-error btn-outline hover:btn-error"
+              <Link 
+                to={searchParams.get('from') ? `/folder/${searchParams.get('from')}` : "/"} 
+                className="btn btn-ghost"
               >
-                <Trash2Icon className="h-5 w-5" />
-                Delete Note
-              </button>
-            </div>
-
-            <div className="card bg-base-100">
-              <div className="card-body">
-                <div className="form-control mb-4">
-                  <label className="label">
-                    <span className="label-text">Title</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Note title"
-                    className="input input-bordered"
-                    value={note.title}
-                    onChange={(e) => setNote({ ...note, title: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-control mb-4">
-                  <label className="label">
-                    <span className="label-text">Content</span>
-                  </label>
-                  <textarea
-                    placeholder="Write your note here..."
-                    className="textarea textarea-bordered h-32"
-                    value={note.content}
-                    onChange={(e) => setNote({ ...note, content: e.target.value })}
-                  />
-                </div>
-
-                <div className="card-actions justify-end">
+                <ArrowLeftIcon className="h-5 w-5" />
+                Back
+              </Link>
+              
+              {!isEditMode && (
+                <div className="flex items-center gap-2">
                   <button 
-                    className="btn btn-primary" 
-                    disabled={saving} 
-                    onClick={handleSave}
+                    onClick={handleEditClick}
+                    className="btn btn-primary btn-outline"
                   >
-                    {saving ? "Saving..." : "Save Changes"}
+                    <EditIcon className="h-5 w-5" />
+                    Edit
+                  </button>
+                  <button 
+                    onClick={handleDeleteClick} 
+                    className="btn btn-error btn-outline hover:btn-error"
+                  >
+                    <Trash2Icon className="h-5 w-5" />
+                    Delete
                   </button>
                 </div>
+              )}
+            </div>
+
+            {/* Note Content */}
+            <div className="card bg-base-100">
+              <div className="card-body">
+                {!isEditMode ? (
+                  /* VIEW MODE */
+                  <>
+                    {/* Note Header */}
+                    <div className="mb-6">
+                      <div className="flex items-start justify-between gap-4 mb-4">
+                        <h1 className="text-3xl font-bold text-base-content flex-1">
+                          {note.title}
+                        </h1>
+                        {getPriorityBadge(note.priority)}
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-base-content/60">
+                        <span>Created {formatDate(new Date(note.createdAt))}</span>
+                        {note.updatedAt !== note.createdAt && (
+                          <span>• Updated {formatDate(new Date(note.updatedAt))}</span>
+                        )}
+                        {note.folderId && (
+                          <span className="flex items-center gap-1">
+                            • <FolderIcon className="size-4" />
+                            {note.folderId.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Note Content */}
+                    <div className="divider"></div>
+                    <div 
+                      className="prose prose-lg max-w-none"
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(note.content) }}
+                    />
+                  </>
+                ) : (
+                  /* EDIT MODE */
+                  <>
+                    <div className="form-control mb-4">
+                      <label className="label">
+                        <span className="label-text">Title *</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Note title"
+                        className="input input-bordered"
+                        value={note.title}
+                        onChange={(e) => setNote({ ...note, title: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text">Priority</span>
+                        </label>
+                        <select
+                          className="select select-bordered"
+                          value={note.priority}
+                          onChange={(e) => setNote({ ...note, priority: e.target.value })}
+                        >
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                        </select>
+                      </div>
+
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text">Folder</span>
+                        </label>
+                        <select
+                          className="select select-bordered"
+                          value={note.folderId?._id || ""}
+                          onChange={(e) => {
+                            const selectedFolderId = e.target.value;
+                            if (selectedFolderId) {
+                              const selectedFolder = folders.find(f => f._id === selectedFolderId);
+                              setNote({ 
+                                ...note, 
+                                folderId: selectedFolder
+                              });
+                            } else {
+                              setNote({ 
+                                ...note, 
+                                folderId: null 
+                              });
+                            }
+                          }}
+                        >
+                          <option value="">No Folder</option>
+                          {folders.map((folder) => (
+                            <option key={folder._id} value={folder._id}>
+                              {folder.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-control mb-6">
+                      <label className="label">
+                        <span className="label-text">Content *</span>
+                      </label>
+                      <EnhancedTextEditor
+                        value={note.content}
+                        onChange={(content) => setNote({ ...note, content })}
+                        placeholder="Write your note here... You can use markdown formatting!"
+                      />
+                    </div>
+
+                    {/* Action Buttons for Edit Mode */}
+                    <div className="flex justify-end gap-3 pt-4 border-t border-base-300">
+                      <button 
+                        onClick={handleCancelEdit}
+                        className="btn btn-error btn-outline hover:btn-error"
+                      >
+                        <XIcon className="h-5 w-5" />
+                        Cancel
+                      </button>
+                      <button 
+                        className="btn btn-primary" 
+                        disabled={saving} 
+                        onClick={handleSave}
+                      >
+                        <SaveIcon className="h-5 w-5" />
+                        {saving ? "Saving..." : "Save Changes"}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

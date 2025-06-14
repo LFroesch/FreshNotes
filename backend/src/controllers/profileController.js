@@ -1,3 +1,4 @@
+// backend/src/controllers/profileController.js
 import { User } from "../models/User.js";
 
 export async function getMyProfile(req, res) {

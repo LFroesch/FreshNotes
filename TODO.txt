@@ -7,7 +7,7 @@ Features to Add
 - Make a way to CLI curl? call to the api via shortcut commands anywhere
     - Example: fnotes add <Note:Params:Params2> 
         Behind the shortcut it curls to xx site with API call add notes with X data
-- Note Folders / Tags / Colors / Staging / priority
+- Note Tags / Colors / Staging
 - Master List / Sorting / Searching
 - Note Timers/Reminders
 - Custom Popups
@@ -23,3 +23,4 @@ Modulars to Put in a Boilerplate File
 - Logging
 - Auth / User Baseline
 - Analytics / Health
+- Feedback Window that emails me feedback or dumps it in a db or something

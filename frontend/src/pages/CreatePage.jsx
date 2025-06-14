@@ -1,21 +1,51 @@
+// frontend/src/pages/CreatePage.jsx
 import { ArrowLeftIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import api from "../lib/axios";
+import EnhancedTextEditor from "../components/EnhancedTextEditor";
 
 const CreatePage = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [priority, setPriority] = useState("medium");
+  const [folderId, setFolderId] = useState("");
+  const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingFolders, setLoadingFolders] = useState(true);
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Fetch folders on component mount
+  useEffect(() => {
+    const fetchFolders = async () => {
+      try {
+        const res = await api.get("/folders");
+        setFolders(res.data);
+        
+        // Set folder from URL parameter if present
+        const folderIdFromUrl = searchParams.get('folderId');
+        if (folderIdFromUrl) {
+          setFolderId(folderIdFromUrl);
+        }
+      } catch (error) {
+        console.log("Error fetching folders", error);
+        toast.error("Failed to load folders");
+      } finally {
+        setLoadingFolders(false);
+      }
+    };
+
+    fetchFolders();
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!title.trim() || !content.trim()) {
-      toast.error("All fields are required");
+      toast.error("Title and content are required");
       return;
     }
 
@@ -24,13 +54,15 @@ const CreatePage = () => {
       await api.post("/notes", {
         title,
         content,
+        priority,
+        folderId: folderId || null,
       });
 
       toast.success("Note created successfully!");
       navigate("/");
     } catch (error) {
       console.log("Error creating note", error);
-      if (error.response.status === 429) {
+      if (error.response?.status === 429) {
         toast.error("Slow down! You're creating notes too fast", {
           duration: 4000,
           icon: "💀",
@@ -58,7 +90,7 @@ const CreatePage = () => {
               <form onSubmit={handleSubmit}>
                 <div className="form-control mb-4">
                   <label className="label">
-                    <span className="label-text">Title</span>
+                    <span className="label-text">Title *</span>
                   </label>
                   <input
                     type="text"
@@ -66,18 +98,59 @@ const CreatePage = () => {
                     className="input input-bordered"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
+                    required
                   />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Priority</span>
+                    </label>
+                    <select
+                      className="select select-bordered"
+                      value={priority}
+                      onChange={(e) => setPriority(e.target.value)}
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Folder</span>
+                    </label>
+                    <select
+                      className="select select-bordered"
+                      value={folderId}
+                      onChange={(e) => setFolderId(e.target.value)}
+                      disabled={loadingFolders}
+                    >
+                      <option value="">No Folder</option>
+                      {folders.map((folder) => (
+                        <option key={folder._id} value={folder._id}>
+                          {folder.name}
+                        </option>
+                      ))}
+                    </select>
+                    {loadingFolders && (
+                      <div className="label">
+                        <span className="label-text-alt">Loading folders...</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="form-control mb-4">
                   <label className="label">
-                    <span className="label-text">Content</span>
+                    <span className="label-text">Content *</span>
                   </label>
-                  <textarea
-                    placeholder="Write your note here..."
-                    className="textarea textarea-bordered h-32"
+                  <EnhancedTextEditor
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
+                    onChange={setContent}
+                    placeholder="Write your note here... You can use markdown formatting!"
                   />
                 </div>
 

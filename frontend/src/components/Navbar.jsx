@@ -1,5 +1,6 @@
+// frontend/src/components/Navbar.jsx
 import { Link } from 'react-router'
-import { PlusIcon, LogOut, User } from 'lucide-react'
+import { PlusIcon, LogOut, User, FolderPlusIcon } from 'lucide-react'
 import { useAuthStore } from '../store/authUser'
 
 const Navbar = () => {
@@ -15,6 +16,11 @@ const Navbar = () => {
                     <div className='flex items-center gap-4'>
                         <Link to={'/create'} className='btn btn-primary'>
                             <PlusIcon className='size-4' />
+                            Note
+                        </Link>
+                        <Link to={'/folder/create'} className='btn btn-secondary'>
+                            <FolderPlusIcon className='size-4' />
+                            Folder
                         </Link>
                         <Link to="/profile" className="btn btn-ghost">
                             <User className="size-4" />

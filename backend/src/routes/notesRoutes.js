@@ -1,3 +1,4 @@
+// backend/src/routes/notesRoutes.js
 import express from 'express';
 import { getAllNotes, createNote, updateNote, deleteNote, getNoteById } from '../controllers/notesController.js';
 import { protectRoute } from '../middleware/protectRoute.js';

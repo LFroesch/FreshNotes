@@ -1,7 +1,11 @@
+// frontend/src/App.jsx
 import { Navigate, Route, Routes } from 'react-router';
 import HomePage from './pages/HomePage';
 import NoteDetailPage from './pages/NoteDetailPage';
 import CreatePage from './pages/CreatePage';
+import CreateFolderPage from './pages/CreateFolderPage';
+import EditFolderPage from './pages/EditFolderPage';
+import FolderDetailPage from './pages/FolderDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
@@ -28,14 +32,18 @@ const App = () => {
   }
 
   return (
-    <div data-theme="forest" className="relative h-full w-full">
-      <div className="absolute inset-0 -z-10 h-full w-full items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_60%,#00FF9D40_100%)]" />
+    <div data-theme="sunset" className="relative h-full w-full">
+      <div className="absolute inset-0 -z-10 h-full w-full items-center px-5 py-24 
+      [background:radial-gradient(125%_125%_at_50%_10%,#000_60%,#00FF9D40_100%)]" />
       <Routes>
         <Route path="/" element={user ? <HomePage /> : <Navigate to="/login" />} />
         <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
         <Route path="/signup" element={!user ? <SignUpPage /> : <Navigate to="/" />} />
         <Route path="/note/:id" element={user ? <NoteDetailPage /> : <Navigate to="/login" />} />
         <Route path="/create" element={user ? <CreatePage /> : <Navigate to="/login" />} />
+        <Route path="/folder/create" element={user ? <CreateFolderPage /> : <Navigate to="/login" />} />
+        <Route path="/folder/:id" element={user ? <FolderDetailPage /> : <Navigate to="/login" />} />
+        <Route path="/folder/:id/edit" element={user ? <EditFolderPage /> : <Navigate to="/login" />} />
         <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

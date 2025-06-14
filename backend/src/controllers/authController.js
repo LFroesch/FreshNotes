@@ -1,3 +1,4 @@
+// backend/src/controllers/authController.js
 import { User } from "../models/User.js";
 import bcryptjs from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateToken.js";
