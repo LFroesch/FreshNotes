@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/authUser";
+import { Link } from "react-router"; // Add this import
 import Navbar from "../components/Navbar";
 import { Edit3, Calendar, FileText } from "lucide-react";
 import axios from "axios";
@@ -202,11 +203,22 @@ const ProfilePage = () => {
 
                 {/* My Notes Preview */}
                 <div>
-                    <h2 className="text-2xl font-bold mb-4">My Recent Notes</h2>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-2xl font-bold">My Recent Notes</h2>
+                        {notes.length > 6 && (
+                            <Link to="/" className="btn btn-outline btn-sm">
+                                View All Notes
+                            </Link>
+                        )}
+                    </div>
                     {notes.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {notes.slice(0, 6).map((note) => (
-                                <div key={note._id} className="card bg-base-100 border-t-4 border-primary">
+                                <Link 
+                                    key={note._id} 
+                                    to={`/note/${note._id}`}
+                                    className="card bg-base-100 border-t-4 border-primary hover:shadow-lg transition-all duration-200 cursor-pointer"
+                                >
                                     <div className="card-body">
                                         <h4 className="card-title text-sm">{note.title}</h4>
                                         <p className="text-xs text-base-content/70 line-clamp-2">{note.content}</p>
@@ -214,13 +226,18 @@ const ProfilePage = () => {
                                             {formatDate(note.createdAt)}
                                         </div>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-base-content/70 text-center py-8">
-                            No notes yet. Start creating some notes!
-                        </p>
+                        <div className="text-center py-8">
+                            <p className="text-base-content/70 mb-4">
+                                No notes yet. Start creating some notes!
+                            </p>
+                            <Link to="/create" className="btn btn-primary">
+                                Create Your First Note
+                            </Link>
+                        </div>
                     )}
                 </div>
             </div>
