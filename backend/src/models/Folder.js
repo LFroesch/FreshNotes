@@ -15,7 +15,7 @@ const folderSchema = new mongoose.Schema({
     },
     color: {
         type: String,
-        default: "#00FF9D", // Default to your app's primary color
+        default: "#00FF9D",
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,

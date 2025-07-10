@@ -6,7 +6,6 @@ export const getAllFolders = async (req, res) => {
   try {
     const folders = await Folder.find({ userId: req.user._id }).sort({ createdAt: -1 });
     
-    // Get note count for each folder
     const foldersWithCounts = await Promise.all(
       folders.map(async (folder) => {
         const noteCount = await Note.countDocuments({ 
@@ -37,8 +36,7 @@ export const getFolderById = async (req, res) => {
     if (!folder) {
       return res.status(404).json({ message: "Folder not found!" });
     }
-    
-    // Get notes in this folder
+
     const notes = await Note.find({ 
       folderId: folder._id, 
       userId: req.user._id 

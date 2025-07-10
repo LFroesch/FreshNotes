@@ -5,7 +5,6 @@ import { protectRoute } from '../middleware/protectRoute.js';
 
 const router = express.Router();
 
-// Protect all note routes
 router.use(protectRoute);
 
 router.get("/", getAllNotes);

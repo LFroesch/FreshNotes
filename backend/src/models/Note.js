@@ -15,9 +15,9 @@ const noteSchema = new mongoose.Schema({
         enum: ['low', 'medium', 'high'],
         default: 'medium',
     },
-    color: {  // Add this field
+    color: {
         type: String,
-        default: "#00FF9D", // Default color
+        default: "#00FF9D",
     },
     folderId: {
         type: mongoose.Schema.Types.ObjectId,

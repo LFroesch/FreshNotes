@@ -8,7 +8,7 @@ const ConfirmationModal = ({
   message = "Are you sure you want to continue?",
   confirmText = "Confirm",
   cancelText = "Cancel",
-  type = "warning" // "warning", "danger", "info"
+  type = "warning"
 }) => {
   if (!isOpen) return null;
 
@@ -26,7 +26,7 @@ const ConfirmationModal = ({
           iconColor: "text-info",
           confirmBtn: "btn-info"
         };
-      default: // warning
+      default:
         return {
           iconBg: "bg-warning/10",
           iconColor: "text-warning",

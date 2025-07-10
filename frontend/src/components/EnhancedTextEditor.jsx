@@ -5,13 +5,11 @@ import { EyeIcon, EditIcon, BoldIcon, ItalicIcon, CodeIcon, QuoteIcon, ListIcon 
 const EnhancedTextEditor = ({ value, onChange, placeholder = "Write your note here..." }) => {
   const [isPreview, setIsPreview] = useState(false);
 
-  // Enhanced markdown to HTML converter with proper link handling
   const renderMarkdown = (text) => {
     if (!text) return '<p class="text-base-content/50 italic">Nothing to preview yet...</p>';
     
     let processedText = text;
     
-    // Helper function to ensure URL has protocol
     const ensureProtocol = (url) => {
       if (url.startsWith('http://') || url.startsWith('https://')) {
         return url;
@@ -87,14 +85,11 @@ const EnhancedTextEditor = ({ value, onChange, placeholder = "Write your note he
     const newText = value.slice(0, start) + before + textToInsert + after + value.slice(end);
     onChange(newText);
     
-    // Restore focus and cursor position
     setTimeout(() => {
       textarea.focus();
       if (selectedText) {
-        // If text was selected, select the newly formatted text
         textarea.setSelectionRange(start + before.length, start + before.length + textToInsert.length);
       } else {
-        // If no text was selected, place cursor between the markdown syntax
         const newPos = start + before.length + placeholder.length;
         textarea.setSelectionRange(newPos, newPos);
       }
@@ -102,8 +97,8 @@ const EnhancedTextEditor = ({ value, onChange, placeholder = "Write your note he
   };
 
   const handleButtonClick = (e, action) => {
-    e.preventDefault(); // Prevent form submission
-    e.stopPropagation(); // Stop event bubbling
+    e.preventDefault(); 
+    e.stopPropagation();
     action();
   };
 

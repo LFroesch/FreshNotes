@@ -10,7 +10,7 @@ import { formatDate } from "../lib/utils";
 
 const NoteDetailPage = () => {
   const [note, setNote] = useState(null);
-  const [originalNote, setOriginalNote] = useState(null); // Store original for cancel functionality
+  const [originalNote, setOriginalNote] = useState(null);
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -47,7 +47,7 @@ const NoteDetailPage = () => {
         ]);
         
         setNote(noteRes.data);
-        setOriginalNote(noteRes.data); // Store original copy
+        setOriginalNote(noteRes.data);
         setFolders(foldersRes.data);
         setNotFound(false);
       } catch (error) {
@@ -65,13 +65,11 @@ const NoteDetailPage = () => {
     fetchData();
   }, [id]);
 
-  // Simple markdown to HTML converter for display
   const renderMarkdown = (text) => {
   if (!text) return '';
   
   let processedText = text;
   
-  // Helper function to ensure URL has protocol
   const ensureProtocol = (url) => {
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
@@ -102,7 +100,6 @@ const NoteDetailPage = () => {
   processedText = processedText.replace(
     /(?<!<[^>]*|`[^`]*|\[[^\]]*\]\()[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}(?:\/[^\s<]*)?/gi,
     (match) => {
-      // Skip if this URL is already inside HTML tags or code
       return `<a href="${ensureProtocol(match)}" class="text-primary underline hover:text-primary-focus" target="_blank" rel="noopener noreferrer">${match}</a>`;
     }
   );
@@ -168,7 +165,7 @@ const NoteDetailPage = () => {
   };
 
   const handleCancelEdit = () => {
-    setNote(originalNote); // Restore original values
+    setNote(originalNote);
     setIsEditMode(false);
   };
 
@@ -212,13 +209,13 @@ const NoteDetailPage = () => {
         title: note.title,
         content: note.content,
         priority: note.priority,
-        color: note.color, // Add color to update data
+        color: note.color,
         folderId: note.folderId?._id || null
       };
 
       const response = await api.put(`/notes/${id}`, updateData);
       setNote(response.data);
-      setOriginalNote(response.data); // Update original with saved data
+      setOriginalNote(response.data);
       setIsEditMode(false);
       
       toast.success("Note updated successfully");

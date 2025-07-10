@@ -20,10 +20,9 @@ const HomePage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch folders and notes in parallel
                 const [foldersRes, notesRes] = await Promise.all([
                     api.get("/folders"),
-                    api.get("/notes?folderId=null") // Get notes not in any folder
+                    api.get("/notes?folderId=null")
                 ]);
                 
                 setFolders(foldersRes.data);

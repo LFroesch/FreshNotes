@@ -8,10 +8,8 @@ export async function getAllNotes(req, res) {
     
     let query = { userId: req.user._id };
     
-    // If folderId is provided, filter by it
     if (folderId) {
       if (folderId === 'null' || folderId === 'none') {
-        // Get notes that are not in any folder
         query.folderId = null;
       } else {
         query.folderId = folderId;
@@ -48,12 +46,10 @@ export async function createNote(req, res) {
   try {
     const { title, content, priority = 'medium', folderId, color } = req.body;
     
-    // Validate priority
     if (!['low', 'medium', 'high'].includes(priority)) {
       return res.status(400).json({ message: "Invalid priority value" });
     }
     
-    // If folderId is provided, verify it exists and belongs to user
     if (folderId && folderId !== 'null') {
       const folder = await Folder.findOne({
         _id: folderId,
@@ -89,12 +85,10 @@ export async function updateNote(req, res) {
   try {
     const { title, content, priority, folderId, color } = req.body;
     
-    // Validate priority if provided
     if (priority && !['low', 'medium', 'high'].includes(priority)) {
       return res.status(400).json({ message: "Invalid priority value" });
     }
     
-    // If folderId is provided, verify it exists and belongs to user
     if (folderId && folderId !== 'null' && folderId !== null) {
       const folder = await Folder.findOne({
         _id: folderId,

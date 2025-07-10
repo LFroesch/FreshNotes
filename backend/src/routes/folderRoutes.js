@@ -11,7 +11,6 @@ import { protectRoute } from '../middleware/protectRoute.js';
 
 const router = express.Router();
 
-// Protect all folder routes
 router.use(protectRoute);
 
 router.get("/", getAllFolders);
