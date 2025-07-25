@@ -1,39 +1,29 @@
 # FreshNotes 📝
 
-A Markdown note-taking app built with React and Node.js.
+Simple Markdown note-taking app with React frontend and Node.js backend.
 
-## Tech Stack
-- **Frontend:** React, Tailwind CSS + DaisyUI, React Router
-- **Backend:** Node.js, Express, MongoDB, Upstash Redis (rate limiting)
+## Stack
+React • Tailwind CSS • Node.js • Express • MongoDB • Redis
 
-## Quick Start
+## Setup
 
-1. **Install dependencies**
+1. **Install & build**
    ```bash
-   # Main Folder
    npm run build
    ```
 
-2. **Setup environment**
-   
-   Create `.env` in backend directory:
+2. **Environment**
+   Create `backend/.env`:
    ```env
    MONGO_URI=your_mongodb_connection_string
    UPSTASH_REDIS_REST_URL=your_upstash_redis_url
    UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
    ```
 
-3. **Run the app**
+3. **Run**
    ```bash
-   # Backend
-   npm run dev
-   
-   # Frontend (new terminal)
-   npm run dev
+   npm run dev  # Backend
+   npm run dev  # Frontend (new terminal)
    ```
 
-App runs on `http://localhost:5173` 🚀
-
----
-
-*Educational project by Lucas*
+Visit `http://localhost:5173`

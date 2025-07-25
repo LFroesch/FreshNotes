@@ -13,13 +13,18 @@ import cookieParser from 'cookie-parser';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5007;
 const __dirname = path.resolve();
 
 // Middleware
 if(process.env.NODE_ENV !== 'production') {
-  app.use(cors());
+  app.use(cors({
+    origin: 'http://localhost:5006', // Your frontend URL
+    credentials: true // Allow cookies to be sent
+  }));
 }
+
+// Always apply these middlewares
 app.use(express.json());
 app.use(cookieParser());
 app.use(rateLimiter);
